@@ -1,33 +1,49 @@
-<script>
-    function generateVideo() {
-        const text = document.getElementById('textInput').value;
-        
-        if (!text.trim()) {
-            alert('Please enter some text before generating a video.');
-            return;
-        }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Generator</title>
+</head>
+<body>
+    <h1>Video Generator</h1>
+    <textarea id="textInput" rows="4" cols="50" placeholder="Enter your text here..."></textarea><br>
+    <button onclick="generateVideo()">Generate Video</button>
 
-        fetch('https://your-backend-url.com/generate-video', { // 🔹 Change to your actual online backend URL
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text, userId: 'test-user' })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Response:', data); // 🔹 Debugging
+    <div id="videoContainer"></div>
 
-            if (!data.videoUrl) {
-                alert('Error: No video URL returned from the server.');
+    <script>
+        function generateVideo() {
+            const text = document.getElementById('textInput').value;
+
+            if (!text.trim()) {
+                alert('Please enter some text before generating a video.');
                 return;
             }
 
-            const videoContainer = document.getElementById('videoContainer');
-            videoContainer.innerHTML = `<h2>Generated Video:</h2>
-                <video controls width='500' src='https://your-backend-url.com/${data.videoUrl}'></video>`;
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error generating video. Please try again.');
-        });
-    }
-</script>
+            fetch('https://your-backend-url.com/generate-video', { // 🔹 Change to your actual online backend URL
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, userId: 'test-user' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Response:', data); // 🔹 Debugging
+
+                if (!data.videoUrl) {
+                    alert('Error: No video URL returned from the server.');
+                    return;
+                }
+
+                const videoContainer = document.getElementById('videoContainer');
+                videoContainer.innerHTML = `<h2>Generated Video:</h2>
+                    <video controls width='500' src='https://your-backend-url.com/${data.videoUrl}'></video>`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error generating video. Please try again.');
+            });
+        }
+    </script>
+</body>
+</html>
