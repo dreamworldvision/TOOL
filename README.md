@@ -1,17 +1,30 @@
-import { useDropzone } from 'react-dropzone';
-
-const PDFUploader = ({ onUpload }) => {
-  const { getRootProps, getInputProps } = useDropzone({
-    accept: 'application/pdf',
-    onDrop: (files) => onUpload(files),
-  });
-
-  return (
-    <div {...getRootProps()} className="p-4 border-dashed border-2">
-      <input {...getInputProps()} />
-      <p>Drag PDFs here or click to upload</p>
-    </div>
-  );
-};
-
-
+[Text-to-Video Creation Tool.txt](https://github.com/user-attachments/files/19043040/Text-to-Video.Creation.Tool.txt)
+[TEXT TO VIDEO.txt](https://github.com/user-attachments/files/19043039/TEXT.TO.VIDEO.txt)
+[TEXT TO PHOTO1.txt](https://github.com/user-attachments/files/19043038/TEXT.TO.PHOTO1.txt)
+[text to photo.txt](https://github.com/user-attachments/files/19043037/text.to.photo.txt)
+[Text Case Converter Widget.txt](https://github.com/user-attachments/files/19043036/Text.Case.Converter.Widget.txt)
+[Random Number Generator Widget.txt](https://github.com/user-attachments/files/19043035/Random.Number.Generator.Widget.txt)
+[QR Code Generator Widget.txt](https://github.com/user-attachments/files/19043034/QR.Code.Generator.Widget.txt)
+[Plagiarism Checker Widget.txt](https://github.com/user-attachments/files/19043033/Plagiarism.Checker.Widget.txt)
+[photo editing tool.txt](https://github.com/user-attachments/files/19043032/photo.editing.tool.txt)
+[pdf to other.txt](https://github.com/user-attachments/files/19043031/pdf.to.other.txt)
+[pdf merger.txt](https://github.com/user-attachments/files/19043030/pdf.merger.txt)
+[Password Generator Widget.txt](https://github.com/user-attachments/files/19043029/Password.Generator.Widget.txt)
+[Lorem Ipsum Generator Widget.txt](https://github.com/user-attachments/files/19043028/Lorem.Ipsum.Generator.Widget.txt)
+[JSON Formatter Widget.txt](https://github.com/user-attachments/files/19043027/JSON.Formatter.Widget.txt)
+[Image Resizer Widget.txt](https://github.com/user-attachments/files/19043026/Image.Resizer.Widget.txt)
+[Hex Color Picker Widget.txt](https://github.com/user-attachments/files/19043025/Hex.Color.Picker.Widget.txt)
+[ext-to-Media Toolkit.txt](https://github.com/user-attachments/files/19043024/ext-to-Media.Toolkit.txt)
+[Currency Converter Widget.txt](https://github.com/user-attachments/files/19043023/Currency.Converter.Widget.txt)
+[Code Minifier Widget.txt](https://github.com/user-attachments/files/19043022/Code.Minifier.Widget.txt)
+[Basic Calculator Widget.txt](https://github.com/user-attachments/files/19043021/Basic.Calculator.Widget.txt)
+[bash.txt](https://github.com/user-attachments/files/19043019/bash.txt)
+[Base64 Encoder or Decoder Widget.txt](https://github.com/user-attachments/files/19043017/Base64.Encoder.or.Decoder.Widget.txt)
+[Word or Character Counter Widget.txt](https://github.com/user-attachments/files/19043015/Word.or.Character.Counter.Widget.txt)
+[WEB APP TEXT TO PHOTO.txt](https://github.com/user-attachments/files/19043014/WEB.APP.TEXT.TO.PHOTO.txt)
+[video watermark.txt](https://github.com/user-attachments/files/19043012/video.watermark.txt)
+[video cutter and merger tool.txt](https://github.com/user-attachments/files/19043010/video.cutter.and.merger.tool.txt)
+[video conversion tool.txt](https://github.com/user-attachments/files/19043008/video.conversion.tool.txt)
+[URL Encoder or Decoder Widget.txt](https://github.com/user-attachments/files/19043007/URL.Encoder.or.Decoder.Widget.txt)
+[Unit Converter Widget.txt](https://github.com/user-attachments/files/19043006/Unit.Converter.Widget.txt)
+[Time Zone Converter Widget.txt](https://github.com/user-attachments/files/19043005/Time.Zone.Converter.Widget.txt)
