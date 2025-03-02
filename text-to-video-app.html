@@ -1,0 +1,39 @@
+// frontend/pages/index.js
+import { useState } from 'react';
+
+export default function Home() {
+  const [text, setText] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+
+  const generateVideo = async () => {
+    const response = await fetch('http://localhost:5000/generate-video', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, userId: 'test-user' }),
+    });
+    
+    const data = await response.json();
+    setVideoUrl(data.videoUrl);
+  };
+
+  return (
+    <div style={{ textAlign: 'center', padding: '20px' }}>
+      <h1>Text to Video Generator</h1>
+      <textarea
+        rows="4"
+        cols="50"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Enter text here..."
+      />
+      <br />
+      <button onClick={generateVideo}>Generate Video</button>
+      {videoUrl && (
+        <div>
+          <h2>Generated Video:</h2>
+          <video controls src={`http://localhost:5000/${videoUrl}`} width="500" />
+        </div>
+      )}
+    </div>
+  );
+}
