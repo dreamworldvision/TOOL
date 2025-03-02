@@ -21,8 +21,7 @@
                 return;
             }
 
-            fetch('https://your-backend-url.com/generate-video', { // 🔹 Change to your actual online backend URL
-                method: 'POST',
+            fetch('https://your-backend-url.com/generate-video', { // TOOL/text-to-video-app.html'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text, userId: 'test-user' })
             })
