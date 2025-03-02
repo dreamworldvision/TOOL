@@ -1,30 +1,94 @@
-[Text-to-Video Creation Tool.txt](https://github.com/user-attachments/files/19043040/Text-to-Video.Creation.Tool.txt)
-[TEXT TO VIDEO.txt](https://github.com/user-attachments/files/19043039/TEXT.TO.VIDEO.txt)
-[TEXT TO PHOTO1.txt](https://github.com/user-attachments/files/19043038/TEXT.TO.PHOTO1.txt)
-[text to photo.txt](https://github.com/user-attachments/files/19043037/text.to.photo.txt)
-[Text Case Converter Widget.txt](https://github.com/user-attachments/files/19043036/Text.Case.Converter.Widget.txt)
-[Random Number Generator Widget.txt](https://github.com/user-attachments/files/19043035/Random.Number.Generator.Widget.txt)
-[QR Code Generator Widget.txt](https://github.com/user-attachments/files/19043034/QR.Code.Generator.Widget.txt)
-[Plagiarism Checker Widget.txt](https://github.com/user-attachments/files/19043033/Plagiarism.Checker.Widget.txt)
-[photo editing tool.txt](https://github.com/user-attachments/files/19043032/photo.editing.tool.txt)
-[pdf to other.txt](https://github.com/user-attachments/files/19043031/pdf.to.other.txt)
-[pdf merger.txt](https://github.com/user-attachments/files/19043030/pdf.merger.txt)
-[Password Generator Widget.txt](https://github.com/user-attachments/files/19043029/Password.Generator.Widget.txt)
-[Lorem Ipsum Generator Widget.txt](https://github.com/user-attachments/files/19043028/Lorem.Ipsum.Generator.Widget.txt)
-[JSON Formatter Widget.txt](https://github.com/user-attachments/files/19043027/JSON.Formatter.Widget.txt)
-[Image Resizer Widget.txt](https://github.com/user-attachments/files/19043026/Image.Resizer.Widget.txt)
-[Hex Color Picker Widget.txt](https://github.com/user-attachments/files/19043025/Hex.Color.Picker.Widget.txt)
-[ext-to-Media Toolkit.txt](https://github.com/user-attachments/files/19043024/ext-to-Media.Toolkit.txt)
-[Currency Converter Widget.txt](https://github.com/user-attachments/files/19043023/Currency.Converter.Widget.txt)
-[Code Minifier Widget.txt](https://github.com/user-attachments/files/19043022/Code.Minifier.Widget.txt)
-[Basic Calculator Widget.txt](https://github.com/user-attachments/files/19043021/Basic.Calculator.Widget.txt)
-[bash.txt](https://github.com/user-attachments/files/19043019/bash.txt)
-[Base64 Encoder or Decoder Widget.txt](https://github.com/user-attachments/files/19043017/Base64.Encoder.or.Decoder.Widget.txt)
-[Word or Character Counter Widget.txt](https://github.com/user-attachments/files/19043015/Word.or.Character.Counter.Widget.txt)
-[WEB APP TEXT TO PHOTO.txt](https://github.com/user-attachments/files/19043014/WEB.APP.TEXT.TO.PHOTO.txt)
-[video watermark.txt](https://github.com/user-attachments/files/19043012/video.watermark.txt)
-[video cutter and merger tool.txt](https://github.com/user-attachments/files/19043010/video.cutter.and.merger.tool.txt)
-[video conversion tool.txt](https://github.com/user-attachments/files/19043008/video.conversion.tool.txt)
-[URL Encoder or Decoder Widget.txt](https://github.com/user-attachments/files/19043007/URL.Encoder.or.Decoder.Widget.txt)
-[Unit Converter Widget.txt](https://github.com/user-attachments/files/19043006/Unit.Converter.Widget.txt)
-[Time Zone Converter Widget.txt](https://github.com/user-attachments/files/19043005/Time.Zone.Converter.Widget.txt)
+import os
+import argparse
+from dotenv import load_dotenv
+from gtts import gTTS
+from moviepy.editor import *
+from PIL import Image
+import requests
+import numpy as np
+
+# Load environment variables
+load_dotenv()
+STABILITY_API_KEY = os.getenv("STABILITY_API_KEY")
+
+def generate_image(prompt, output_path="temp_image.png"):
+    """Generate image using Stability AI API"""
+    headers = {
+        "Authorization": f"Bearer {STABILITY_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "text_prompts": [{"text": prompt}],
+        "height": 512,
+        "width": 512,
+        "steps": 30
+    }
+
+    response = requests.post(
+        "https://api.stability.ai/v1/generation/stable-diffusion-512-v2-1/text-to-image",
+        headers=headers,
+        json=data
+    )
+
+    if response.status_code == 200:
+        with open(output_path, "wb") as f:
+            f.write(response.content)
+        return output_path
+    else:
+        raise Exception(f"Image generation failed: {response.text}")
+
+def text_to_speech(text, output_path="temp_audio.mp3"):
+    """Convert text to speech using gTTS"""
+    tts = gTTS(text=text, lang='en', slow=False)
+    tts.save(output_path)
+    return output_path
+
+def create_video_clip(image_path, audio_path, duration):
+    """Create video clip with image and audio"""
+    image = ImageClip(image_path).set_duration(duration)
+    audio = AudioFileClip(audio_path)
+    return image.set_audio(audio)
+
+def text_to_video(text, output_file="output.mp4"):
+    """Main conversion function"""
+    # Split text into sentences
+    sentences = [s.strip() for s in text.split('.') if s.strip()]
+    
+    clips = []
+    
+    for sentence in sentences:
+        try:
+            # Generate assets for each sentence
+            img_path = generate_image(sentence)
+            audio_path = text_to_speech(sentence)
+            
+            # Get audio duration
+            audio = AudioFileClip(audio_path)
+            duration = audio.duration
+            
+            # Create clip
+            clip = create_video_clip(img_path, audio_path, duration)
+            clips.append(clip)
+        except Exception as e:
+            print(f"Error processing sentence '{sentence}': {str(e)}")
+    
+    # Combine all clips
+    final_video = concatenate_videoclips(clips)
+    final_video.write_videofile(output_file, fps=24)
+    
+    # Cleanup temp files
+    for f in ["temp_image.png", "temp_audio.mp3"]:
+        if os.path.exists(f):
+            os.remove(f)
+    
+    return output_file
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Convert text to video")
+    parser.add_argument("--text", type=str, required=True, help="Input text")
+    parser.add_argument("--output", type=str, default="output.mp4", help="Output video file")
+    args = parser.parse_args()
+    
+    result = text_to_video(args.text, args.output)
+    print(f"Video created: {result}")
