@@ -1,0 +1,34 @@
+<!-- frontend/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Video Generator</title>
+</head>
+<body>
+    <h1>Text to Video Generator</h1>
+    <textarea id="textInput" rows="4" cols="50" placeholder="Enter text here..."></textarea>
+    <br>
+    <button onclick="generateVideo()">Generate Video</button>
+    <div id="videoContainer"></div>
+    
+    <script>
+        function generateVideo() {
+            const text = document.getElementById('textInput').value;
+            
+            fetch('http://localhost:5000/generate-video', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, userId: 'test-user' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const videoContainer = document.getElementById('videoContainer');
+                videoContainer.innerHTML = `<h2>Generated Video:</h2><video controls width='500' src='http://localhost:5000/${data.videoUrl}'></video>`;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
