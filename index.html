@@ -5,6 +5,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Text to Video Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        textarea {
+            width: 80%;
+            max-width: 500px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #videoContainer {
+            margin-top: 20px;
+        }
+        a {
+            display: block;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <h1>Text to Video Generator</h1>
@@ -12,10 +54,16 @@
     <br>
     <button onclick="generateVideo()">Generate Video</button>
     <div id="videoContainer"></div>
+    <a href="text-to-video-app.html">Go to Full App</a>
     
     <script>
         function generateVideo() {
             const text = document.getElementById('textInput').value;
+            
+            if (!text.trim()) {
+                alert('Please enter some text before generating a video.');
+                return;
+            }
             
             fetch('http://localhost:5000/generate-video', {
                 method: 'POST',
@@ -27,7 +75,10 @@
                 const videoContainer = document.getElementById('videoContainer');
                 videoContainer.innerHTML = `<h2>Generated Video:</h2><video controls width='500' src='http://localhost:5000/${data.videoUrl}'></video>`;
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error generating video. Please try again.');
+            });
         }
     </script>
 </body>
