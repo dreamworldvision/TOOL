@@ -27,9 +27,11 @@ export default function Home() {
         placeholder="Enter text here..."
       />
       <br />
-      <button onClick={generateVideo}>Generate Video</button>
-      {videoUrl && (
-        <div>
+<button onclick="generateVideo()">Generate Video</button>
+<br />
+<a href="text-to-video-app.html">Go to Text-to-Video App<text-to-video-app.html/a>
+<div id="videoContainer"></div>
+
           <h2>Generated Video:</h2>
           <video controls src={`http://localhost:5000/${videoUrl}`} width="500" />
         </div>
