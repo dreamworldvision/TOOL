@@ -1,0 +1,160 @@
+import requests
+from googletrans import Translator, LANGUAGES  # For language translation
+import os
+import unittest
+from typing import Union, Dict
+import pdf2docx  # For PDF to Word conversion
+from PIL import Image  # For image conversion
+
+# API keys (replace with your own)
+CURRENCY_API_KEY = "YOUR_EXCHANGERATE_API_KEY"  # Get from exchangerate-api.com
+CLOUDCONVERT_API_KEY = "YOUR_CLOUDCONVERT_API_KEY"  # Get from cloudconvert.com
+
+class ConversionTool:
+    def __init__(self):
+        self.translator = Translator()
+        self.unit_conversions = {
+            "length": {"m_to_ft": 3.28084, "ft_to_m": 0.3048},
+            "weight": {"kg_to_lb": 2.20462, "lb_to_kg": 0.453592},
+            "temperature": {"c_to_f": lambda x: (x * 9/5) + 32, "f_to_c": lambda x: (x - 32) * 5/9}
+        }
+
+    # Unit Conversion
+    def unit_converter(self, value: float, from_unit: str, to_unit: str, category: str) -> Union[float, str]:
+        try:
+            value = float(value)
+            if category not in self.unit_conversions:
+                return f"Error: Unsupported category '{category}'"
+            key = f"{from_unit}_to_{to_unit}"
+            if key not in self.unit_conversions[category]:
+                return f"Error: Conversion from {from_unit} to {to_unit} not supported"
+            conversion = self.unit_conversions[category][key]
+            return conversion(value) if callable(conversion) else value * conversion
+        except ValueError:
+            return "Error: Invalid input value"
+
+    # Currency Conversion
+    def currency_converter(self, amount: float, from_currency: str, to_currency: str) -> Union[float, str]:
+        try:
+            url = f"https://api.exchangerate-api.com/v4/latest/{from_currency}"
+            response = requests.get(url).json()
+            if "rates" not in response:
+                return "Error: Currency code not recognized"
+            rate = response["rates"].get(to_currency)
+            if not rate:
+                return f"Error: '{to_currency}' not supported"
+            return amount * rate
+        except requests.RequestException:
+            return "Error: Failed to fetch exchange rates"
+
+    # File Conversion
+    def file_converter(self, input_file: str, output_format: str) -> str:
+        if not os.path.exists(input_file):
+            return "Error: Input file does not exist"
+        
+        if input_file.endswith(".pdf") and output_format == "docx":
+            try:
+                from pdf2docx import Converter
+                output_file = input_file.replace(".pdf", ".docx")
+                cv = Converter(input_file)
+                cv.convert(output_file)
+                cv.close()
+                return f"Converted to {output_file}"
+            except Exception as e:
+                return f"Error: {str(e)}"
+        
+        elif input_file.endswith((".png", ".jpg", ".jpeg")) and output_format in ["png", "jpg"]:
+            try:
+                output_file = input_file.rsplit(".", 1)[0] + f".{output_format}"
+                img = Image.open(input_file)
+                img.save(output_file, output_format.upper())
+                return f"Converted to {output_file}"
+            except Exception as e:
+                return f"Error: {str(e)}"
+        
+        return "Error: Unsupported file conversion"
+
+    # Language Translation
+    def translate(self, text: str, to_lang: str) -> str:
+        try:
+            if to_lang not in LANGUAGES:
+                return f"Error: Language '{to_lang}' not supported"
+            result = self.translator.translate(text, dest=to_lang)
+            return result.text
+        except Exception as e:
+            return f"Error: {str(e)}"
+
+    # NLP-based input parsing
+    def parse_input(self, user_input: str) -> Dict[str, str]:
+        user_input = user_input.lower().strip()
+        if "convert" in user_input:
+            if "to" in user_input:
+                parts = user_input.split("to")
+                value_unit = parts[0].replace("convert", "").strip().split()
+                if len(value_unit) >= 2:
+                    value, from_unit = value_unit[0], " ".join(value_unit[1:])
+                    to_unit = parts[1].strip()
+                    if from_unit in ["usd", "eur"]:  # Currency detection
+                        return {"type": "currency", "amount": value, "from": from_unit, "to": to_unit}
+                    elif from_unit in ["kg", "lb", "m", "ft", "c", "f"]:  # Unit detection
+                        category = "length" if from_unit in ["m", "ft"] else "weight" if from_unit in ["kg", "lb"] else "temperature"
+                        return {"type": "unit", "value": value, "from": from_unit, "to": to_unit, "category": category}
+        elif "translate" in user_input:
+            parts = user_input.split("to")
+            text = parts[0].replace("translate", "").strip()
+            to_lang = parts[1].strip()
+            return {"type": "translate", "text": text, "to": to_lang}
+        return {"type": "unknown", "error": "Invalid input format"}
+
+    # Main execution
+    def execute(self, user_input: str) -> str:
+        parsed = self.parse_input(user_input)
+        if parsed["type"] == "unit":
+            return self.unit_converter(parsed["value"], parsed["from"], parsed["to"], parsed["category"])
+        elif parsed["type"] == "currency":
+            return self.currency_converter(float(parsed["amount"]), parsed["from"], parsed["to"])
+        elif parsed["type"] == "translate":
+            return self.translate(parsed["text"], parsed["to"])
+        elif parsed["type"] == "unknown":
+            return parsed["error"]
+        return "Error: Conversion type not supported"
+
+# CLI Interface
+def main():
+    tool = ConversionTool()
+    print("AI Conversion Tool (type 'exit' to quit)")
+    while True:
+        user_input = input("> ")
+        if user_input.lower() == "exit":
+            break
+        elif user_input.startswith("file convert"):
+            _, _, input_file, to_format = user_input.split(" ", 3)
+            result = tool.file_converter(input_file, to_format)
+            print(result)
+        else:
+            result = tool.execute(user_input)
+            print(result)
+
+# Unit Tests
+class TestConversionTool(unittest.TestCase):
+    def setUp(self):
+        self.tool = ConversionTool()
+
+    def test_unit_conversion(self):
+        self.assertAlmostEqual(self.tool.unit_converter(5, "ft", "m", "length"), 1.524, places=3)
+        self.assertEqual(self.tool.unit_converter("abc", "ft", "m", "length"), "Error: Invalid input value")
+
+    def test_currency_conversion(self):
+        result = self.tool.currency_converter(100, "USD", "EUR")
+        self.assertTrue(isinstance(result, (float, str)))
+
+    def test_translation(self):
+        self.assertEqual(self.tool.translate("Hello", "fr"), "Bonjour")
+
+    def test_parse_input(self):
+        self.assertEqual(self.tool.parse_input("convert 5 ft to m"), 
+                         {"type": "unit", "value": "5", "from": "ft", "to": "m", "category": "length"})
+
+if __name__ == "__main__":
+    main()
+    # Uncomment to run tests: unittest.main()
